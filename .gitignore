@@ -1,0 +1,7 @@
+*.exe
+.vscode
+apiserver
+migrate
+!migrate/
+!apiserver/
+.idea/
