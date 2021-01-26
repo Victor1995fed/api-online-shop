@@ -1,0 +1,4 @@
+bind_addr = ":80"
+log_level = "debug"
+# database_url = "host=pg_golang_test dbname=restapi_dev user=user password=secret sslmode=disable"
+# session_key = "77CBBC54E94E68CBB2BE159D3DF2E"
