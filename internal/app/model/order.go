@@ -1,10 +1,11 @@
 package model
 
-//Product ...
-type Product struct {
+//Order ...
+type Order struct {
 	ID          int    `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Price       string `json:"price"`
 	ImageURL    string `json:""`
+	DateCreate  string `json:""`
 }

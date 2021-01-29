@@ -1,20 +1,26 @@
 package apiserver
 
-// import (
-// 	"context"
-// 	"encoding/json"
-// 	"errors"
-// 	"net/http"
-// 	"test-golang-api/internal/app/models"
-// 	"test-golang-api/internal/app/store"
-// 	"time"
+import (
+	"api-online-store/internal/app/store"
+	"net/http"
 
-// 	"github.com/google/uuid"
-// 	"github.com/gorilla/handlers"
-// 	"github.com/gorilla/mux"
-// 	"github.com/gorilla/sessions"
-// 	"github.com/sirupsen/logrus"
-// )
+	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
+)
+
+// "context"
+// "encoding/json"
+// "errors"
+// "net/http"
+// "test-golang-api/internal/app/models"
+
+// "time"
+
+// "github.com/google/uuid"
+// "github.com/gorilla/handlers"
+// "github.com/gorilla/mux"
+// "github.com/gorilla/sessions"
+// "github.com/sirupsen/logrus"
 
 // const (
 // 	sessionName        = "testapi"
@@ -28,29 +34,29 @@ package apiserver
 // )
 
 // type ctxKey int8
-// type server struct {
-// 	router *mux.Router
-// 	// logger       *logrus.Logger
-// 	store store.Store
-// 	// sessionStore sessions.Store
-// }
+type server struct {
+	router *mux.Router
+	// logger       *logrus.Logger
+	store store.Store
+	// sessionStore sessions.Store
+}
 
-// func newServer(store store.Store, sessionStore sessions.Store) *server {
-// 	s := &server{
-// 		router:       mux.NewRouter(),
-// 		logger:       logrus.New(),
-// 		store:        store,
-// 		sessionStore: sessionStore,
-// 	}
+func newServer(store store.Store, sessionStore sessions.Store) *server {
+	s := &server{
+		// router:       mux.NewRouter(),
+		// logger:       logrus.New(),
+		store: store,
+		// sessionStore: sessionStore,
+	}
 
-// 	s.configureRouter()
+	// s.configureRouter()
 
-// 	return s
-// }
+	return s
+}
 
-// func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-// 	s.router.ServeHTTP(w, r)
-// }
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.router.ServeHTTP(w, r)
+}
 
 // func (s *server) configureRouter() {
 // 	s.router.Use(s.setRequestID)
