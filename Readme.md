@@ -9,7 +9,19 @@ API for online store on golang
 
      ```make init```
 
+## Other commands:
+### Postgres:
+ * Connect (inside the pgsql-container) :
+ 
+    ```psql  restapi_dev user```
 
+ * Up migrations:
+ 
+    ```./migrate  -path migrations -database "postgres://pgsql?dbname=somedb&user=someuser&password=somepassword&sslmode=disable" up ``` 
+
+ * Down  all migrations: 
+
+    ```./migrate  -path migrations -database "postgres://pgsql?dbname=somedb&user=someuser&password=somepassword&sslmode=disable"  down```  
 
 ## Useful links:
 

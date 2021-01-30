@@ -22,8 +22,9 @@ func Start(config *Config) error {
 	}
 
 	defer db.Close()
-	store := sqlstore.New(db)
 
+	store := sqlstore.New(db)
+	// fmt.Println(store.User())
 	// sessionStore := sessions.NewCookieStore([]byte(config.SessionKey))
 	srv := newServer(store, nil)
 	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

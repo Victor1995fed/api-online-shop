@@ -12,8 +12,8 @@ type Store struct {
 }
 
 //New ...
-func New(db *sql.DB) *Store {
-	return &Store{
+func New(db *sql.DB) Store {
+	return Store{
 		db: db,
 	}
 
@@ -29,11 +29,11 @@ func New(db *sql.DB) *Store {
 // 	return "sdf"
 // }
 
-// User ...
-// func (s *Store) User() string {
+//User ...
+func (s *Store) User() string {
 
-// 	return "sdf"
-// }
+	return "test"
+}
 
 // 	s.userRepository = &UserRepository{
 // 		store: s,

@@ -2,8 +2,10 @@ package apiserver
 
 import (
 	"api-online-store/internal/app/store"
+	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
@@ -38,18 +40,19 @@ type server struct {
 	router *mux.Router
 	// logger       *logrus.Logger
 	store store.Store
+	// controllers
 	// sessionStore sessions.Store
 }
 
 func newServer(store store.Store, sessionStore sessions.Store) *server {
 	s := &server{
-		// router:       mux.NewRouter(),
+		router: mux.NewRouter(),
 		// logger:       logrus.New(),
 		store: store,
 		// sessionStore: sessionStore,
 	}
 
-	// s.configureRouter()
+	s.configureRouter()
 
 	return s
 }
@@ -58,16 +61,43 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }
 
-// func (s *server) configureRouter() {
-// 	s.router.Use(s.setRequestID)
-// 	s.router.Use(s.logRequest)
-// 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
-// 	s.router.HandleFunc("/users", s.handleUsersCreate()).Methods("POST")
-// 	s.router.HandleFunc("/sessions", s.handleSessionsCreate()).Methods("POST")
+func (s *server) configureRouter() {
+	// s.router.Use(s.setRequestID)
+	// s.router.Use(s.logRequest)
+	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
+	// userController := *controller.User
+	s.router.HandleFunc("/product", s.handleProductCreate()).Methods("POST")
+	// println(controller.User)
+	// s.router.HandleFunc("/users", s.listUsers()).Methods("GET")
+	s.router.HandleFunc("/users", s.ListUsers()).Methods("GET")
+	// s.router.HandleFunc("/sessions", s.handleSessionsCreate()).Methods("POST")
 
-// 	private := s.router.PathPrefix("/private").Subrouter()
-// 	private.Use(s.authenticateUser)
-// 	private.HandleFunc("/whoami", s.handlerWhoami()).Methods("GET")
+	// private := s.router.PathPrefix("/private").Subrouter()
+	// private.Use(s.authenticateUser)
+	// private.HandleFunc("/whoami", s.handlerWhoami()).Methods("GET")
+}
+
+// func (s *server) listUsers() http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		// req := &request{}
+// 		// if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+// 		// 	s.error(w, r, http.StatusBadRequest, err)
+// 		// 	return
+// 		// }
+// 		// u := &models.User{
+// 		// 	Email:    req.Email,
+// 		// 	Password: req.Password,
+// 		// }
+
+// 		// if err := s.store.User().Create(u); err != nil {
+// 		// 	s.error(w, r, http.StatusUnprocessableEntity, err)
+// 		// 	return
+// 		// }
+// 		// u.Sanitaze()
+// 		fmt.Fprint(w, "Users!\n")
+// 		// s.respond(w, r, http.StatusCreated, nil)
+
+// 	}
 // }
 
 // func (s *server) setRequestID(next http.Handler) http.Handler {
@@ -189,13 +219,13 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // 	}
 // }
 
-// func (s *server) error(w http.ResponseWriter, r *http.Request, code int, err error) {
-// 	s.respond(w, r, code, map[string]string{"error": err.Error()})
-// }
+func (s *server) error(w http.ResponseWriter, r *http.Request, code int, err error) {
+	s.respond(w, r, code, map[string]string{"error": err.Error()})
+}
 
-// func (s *server) respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
-// 	w.WriteHeader(code)
-// 	if data != nil {
-// 		json.NewEncoder(w).Encode(data)
-// 	}
-// }
+func (s *server) respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
+	w.WriteHeader(code)
+	if data != nil {
+		json.NewEncoder(w).Encode(data)
+	}
+}
