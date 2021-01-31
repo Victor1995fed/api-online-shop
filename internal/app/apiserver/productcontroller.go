@@ -6,12 +6,6 @@ import (
 	"net/http"
 )
 
-// func (s *server) handleProductCreate() http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		fmt.Fprint(w, "Users!\n")
-// 	}
-// }
-
 func (s *server) handleProductCreate() http.HandlerFunc {
 
 	type request struct {
@@ -31,12 +25,18 @@ func (s *server) handleProductCreate() http.HandlerFunc {
 			Price:       req.Price,
 		}
 
-		// if err := s.store.User().Create(u); err != nil {
-		// 	s.error(w, r, http.StatusUnprocessableEntity, err)
-		// 	return
-		// }
+		if err := s.store.Product().Create(p); err != nil {
+			s.error(w, r, http.StatusUnprocessableEntity, err)
+			return
+		}
 		// p.Sanitaze()
 		s.respond(w, r, http.StatusCreated, p)
 
 	}
 }
+
+// func (s *server) handlerFind() http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*models.User))
+// 	}
+// }

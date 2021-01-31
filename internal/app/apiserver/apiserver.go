@@ -26,7 +26,9 @@ func Start(config *Config) error {
 	store := sqlstore.New(db)
 	// fmt.Println(store.User())
 	// sessionStore := sessions.NewCookieStore([]byte(config.SessionKey))
+	// os.Exit(3)
 	srv := newServer(store, nil)
+
 	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	// 	fmt.Fprintf(w, "Hello World!")
 	// })

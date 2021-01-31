@@ -1,6 +1,7 @@
 package sqlstore
 
 import (
+	"api-online-store/internal/app/store"
 	"database/sql"
 	// _ "github.com/jackc/pgx/v4/stdlib" // ...
 )
@@ -9,11 +10,12 @@ import (
 type Store struct {
 	db *sql.DB
 	// userRepository *UserRepository
+	productRepository *ProductRepository
 }
 
 //New ...
-func New(db *sql.DB) Store {
-	return Store{
+func New(db *sql.DB) *Store {
+	return &Store{
 		db: db,
 	}
 
@@ -33,6 +35,19 @@ func New(db *sql.DB) Store {
 func (s *Store) User() string {
 
 	return "test"
+}
+
+//Product ...
+func (s *Store) Product() store.ProductRepository {
+
+	if s.productRepository != nil {
+		return s.productRepository
+	}
+
+	s.productRepository = &ProductRepository{
+		store: s,
+	}
+	return s.productRepository
 }
 
 // 	s.userRepository = &UserRepository{

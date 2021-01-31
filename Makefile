@@ -1,9 +1,20 @@
+include .env
+export
+
 .PHONY: build
 build:
 		go build -v ./cmd/apiserver
 .PHONY: test
 test:
 	go test -v -race -timeout 30s ./...
+
+.PHONY: migrate up
+migrate up:
+	./migrate -path migrations -database "postgres://pgsql?dbname=${POSTGRES_DB}&user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}&sslmode=disable" up
+
+.PHONY: migrate down
+migrate down:
+	./migrate -path migrations -database "postgres://pgsql?dbname=${POSTGRES_DB}&user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}&sslmode=disable" down
 .PHONY: install
 install:
 	curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz  \
