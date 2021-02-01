@@ -13,6 +13,7 @@ type UserRepository interface {
 type ProductRepository interface {
 	Create(*model.Product) error
 	Find(int) (*model.Product, error)
-	Update(int) (*model.Product, error)
-	Delete(int) (bool, error)
+	Update(*model.Product) error
+	List(map[string]string) (map[int]*model.Product, error)
+	Delete(*model.Product) error
 }
