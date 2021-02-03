@@ -14,7 +14,9 @@ API for online store on golang
  * Connect (inside the pgsql-container) :
  
     ```psql  restapi_dev user```
+ * Create migrations:
 
+   ```make migrate-create MN=name_migration```
  * Up migrations:
  
     ```./migrate  -path migrations -database "postgres://pgsql?dbname=somedb&user=someuser&password=somepassword&sslmode=disable" up ``` 

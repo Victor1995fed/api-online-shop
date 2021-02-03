@@ -14,6 +14,15 @@ type ProductRepository interface {
 	Create(*model.Product) error
 	Find(int) (*model.Product, error)
 	Update(*model.Product) error
-	List(map[string]string) (map[int]*model.Product, error)
+	List(map[string]string) ([]model.Product, error)
 	Delete(*model.Product) error
+}
+
+// TagRepository ...
+type TagRepository interface {
+	Create(*model.Tag) error
+	Find(int) (*model.Tag, error)
+	Update(*model.Tag) error
+	List(map[string]string) ([]model.Tag, error)
+	Delete(*model.Tag) error
 }

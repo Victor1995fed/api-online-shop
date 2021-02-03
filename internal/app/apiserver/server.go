@@ -66,10 +66,18 @@ func (s *server) configureRouter() {
 	// s.router.Use(s.logRequest)
 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
 	// userController := *controller.User
-	s.router.HandleFunc("/product", s.handleProductCreate()).Methods("POST")
+	// Product
 	s.router.HandleFunc("/product", s.handleProductFind()).Methods("GET")
+	s.router.HandleFunc("/product-list", s.handleProductList()).Methods("GET")
+	s.router.HandleFunc("/product", s.handleProductCreate()).Methods("POST")
 	s.router.HandleFunc("/product", s.handleProductUpdate()).Methods("PUT")
 	s.router.HandleFunc("/product", s.handleProductDelete()).Methods("DELETE")
+	//Tag
+	s.router.HandleFunc("/tag", s.handleTagFind()).Methods("GET")
+	s.router.HandleFunc("/tag-list", s.handleTagList()).Methods("GET")
+	s.router.HandleFunc("/tag", s.handleTagCreate()).Methods("POST")
+	s.router.HandleFunc("/tag", s.handleTagUpdate()).Methods("PUT")
+	s.router.HandleFunc("/tag", s.handleTagDelete()).Methods("DELETE")
 	// println(controller.User)
 	// s.router.HandleFunc("/users", s.listUsers()).Methods("GET")
 	s.router.HandleFunc("/users", s.ListUsers()).Methods("GET")

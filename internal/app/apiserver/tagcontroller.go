@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (s *server) handleProductCreate() http.HandlerFunc {
+func (s *server) handleTagCreate() http.HandlerFunc {
 
 	type request struct {
 		Title       string `json:"title"`
@@ -19,13 +19,11 @@ func (s *server) handleProductCreate() http.HandlerFunc {
 			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
-		p := &model.Product{
-			Title:       req.Title,
-			Description: req.Description,
-			Price:       req.Price,
+		p := &model.Tag{
+			Title: req.Title,
 		}
 
-		if err := s.store.Product().Create(p); err != nil {
+		if err := s.store.Tag().Create(p); err != nil {
 			s.error(w, r, http.StatusUnprocessableEntity, err)
 			return
 		}
@@ -35,7 +33,7 @@ func (s *server) handleProductCreate() http.HandlerFunc {
 	}
 }
 
-func (s *server) handleProductFind() http.HandlerFunc {
+func (s *server) handleTagFind() http.HandlerFunc {
 	type request struct {
 		ID int `json:"id"`
 	}
@@ -46,7 +44,7 @@ func (s *server) handleProductFind() http.HandlerFunc {
 			return
 		}
 		id := req.ID
-		p, err := s.store.Product().Find(id)
+		p, err := s.store.Tag().Find(id)
 		if err != nil {
 			s.error(w, r, http.StatusUnprocessableEntity, err)
 			return
@@ -57,7 +55,7 @@ func (s *server) handleProductFind() http.HandlerFunc {
 	}
 }
 
-func (s *server) handleProductList() http.HandlerFunc {
+func (s *server) handleTagList() http.HandlerFunc {
 	type request struct {
 		Count string `json:"count"`
 	}
@@ -70,7 +68,7 @@ func (s *server) handleProductList() http.HandlerFunc {
 
 		m := make(map[string]string)
 		m["count"] = req.Count
-		p, err := s.store.Product().List(m)
+		p, err := s.store.Tag().List(m)
 		if err != nil {
 			s.error(w, r, http.StatusUnprocessableEntity, err)
 			return
@@ -80,7 +78,7 @@ func (s *server) handleProductList() http.HandlerFunc {
 	}
 }
 
-func (s *server) handleProductUpdate() http.HandlerFunc {
+func (s *server) handleTagUpdate() http.HandlerFunc {
 	type request struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
@@ -94,15 +92,12 @@ func (s *server) handleProductUpdate() http.HandlerFunc {
 			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
-		p := &model.Product{
-			Title:       req.Title,
-			Description: req.Description,
-			Price:       req.Price,
-			ImageURL:    req.ImgURL,
-			ID:          req.ID,
+		p := &model.Tag{
+			Title: req.Title,
+			ID:    req.ID,
 		}
 
-		if err := s.store.Product().Update(p); err != nil {
+		if err := s.store.Tag().Update(p); err != nil {
 			s.error(w, r, http.StatusUnprocessableEntity, err)
 			return
 		}
@@ -111,7 +106,7 @@ func (s *server) handleProductUpdate() http.HandlerFunc {
 	}
 }
 
-func (s *server) handleProductDelete() http.HandlerFunc {
+func (s *server) handleTagDelete() http.HandlerFunc {
 	type request struct {
 		ID int `json:"id"`
 	}
@@ -121,11 +116,11 @@ func (s *server) handleProductDelete() http.HandlerFunc {
 			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
-		p := &model.Product{
+		p := &model.Tag{
 			ID: req.ID,
 		}
 
-		if err := s.store.Product().Delete(p); err != nil {
+		if err := s.store.Tag().Delete(p); err != nil {
 			s.error(w, r, http.StatusUnprocessableEntity, err)
 			return
 		}

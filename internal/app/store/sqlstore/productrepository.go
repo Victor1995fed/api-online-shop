@@ -4,6 +4,9 @@ import (
 	"api-online-store/internal/app/model"
 	"api-online-store/internal/app/store"
 	"database/sql"
+	"fmt"
+	"log"
+	"strconv"
 )
 
 //ProductRepository ...
@@ -16,9 +19,6 @@ func (r *ProductRepository) Create(p *model.Product) error {
 	if err := p.Validate(p.GetSupportedScenarioValidation()["CREATE"]); err != nil {
 		return err
 	}
-	// if err := u.BeforeCreate(); err != nil {
-	// 	return err
-	// }
 	return r.store.db.QueryRow(
 		"INSERT INTO "+p.GetTableName()+" (title, description, price, image_url ) VALUES ($1, $2, $3, $4) RETURNING id",
 		p.Title,
@@ -53,9 +53,7 @@ func (r *ProductRepository) Update(p *model.Product) error {
 	if err := p.Validate(p.GetSupportedScenarioValidation()["UPDATE"]); err != nil {
 		return err
 	}
-	// if err := u.BeforeCreate(); err != nil {
-	// 	return err
-	// }
+
 	return r.store.db.QueryRow(
 		"UPDATE "+p.GetTableName()+" SET title=$1, description=$2, price=$3, image_url=$4  WHERE id=$5 RETURNING id",
 		p.Title,
@@ -67,11 +65,35 @@ func (r *ProductRepository) Update(p *model.Product) error {
 }
 
 //List ...
-func (r *ProductRepository) List(m map[string]string) (map[int]*model.Product, error) {
-	var p map[int]*model.Product
-	// if err := p.Validate(p.GetSupportedScenarioValidation()["DELETE"]); err != nil {
-	// 	return err
-	// }
+func (r *ProductRepository) List(m map[string]string) ([]model.Product, error) {
+	p := []model.Product{}
+	c, err := strconv.Atoi(m["count"])
+	if err != nil {
+		return p, err
+	}
+	if c > 100 {
+		c = 100
+	}
+	var productModel *model.Product
+
+	rows, err := r.store.db.Query("SELECT id, title, description, price  FROM "+productModel.GetTableName()+" LIMIT  $1", c)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		var pr model.Product
+		err := rows.Scan(&pr.ID, &pr.Title, &pr.Description, &pr.Price)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(pr)
+		p = append(p, pr)
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+
 	return p, nil
 }
 
@@ -80,9 +102,6 @@ func (r *ProductRepository) Delete(p *model.Product) error {
 	if err := p.Validate(p.GetSupportedScenarioValidation()["DELETE"]); err != nil {
 		return err
 	}
-	// if err := u.BeforeCreate(); err != nil {
-	// 	return err
-	// }
 	_, err := r.store.db.Exec(
 		"DELETE FROM "+p.GetTableName()+" WHERE id=$1",
 		p.ID,

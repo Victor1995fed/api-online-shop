@@ -11,6 +11,7 @@ type Store struct {
 	db *sql.DB
 	// userRepository *UserRepository
 	productRepository *ProductRepository
+	tagRepository     *TagRepository
 }
 
 //New ...
@@ -48,6 +49,19 @@ func (s *Store) Product() store.ProductRepository {
 		store: s,
 	}
 	return s.productRepository
+}
+
+//Tag ...
+func (s *Store) Tag() store.TagRepository {
+
+	if s.tagRepository != nil {
+		return s.tagRepository
+	}
+
+	s.tagRepository = &TagRepository{
+		store: s,
+	}
+	return s.tagRepository
 }
 
 // 	s.userRepository = &UserRepository{
