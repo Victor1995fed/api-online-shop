@@ -21,7 +21,7 @@ migrate-create:
 
 .PHONY: install
 install:
-	curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz  \
+	curl -L  $(MIGRATION_URL_DOWNLOAD)  \
     | tar xvz ; \
     mv migrate.linux-amd64 migrate
 .DEFAULT_GOAL := build
