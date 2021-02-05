@@ -25,6 +25,10 @@ API for online store on golang
 
     ```./migrate  -path migrations -database "postgres://pgsql?dbname=somedb&user=someuser&password=somepassword&sslmode=disable"  down```  
 
+## Not implemented, but planned
+* Registration castomers
+* New payment methods
+
 ## Useful links:
 
 * [Standard Go Project Layout](https://github.com/golang-standards/project-layout)
