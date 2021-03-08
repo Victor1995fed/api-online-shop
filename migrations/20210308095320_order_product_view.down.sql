@@ -1,0 +1,1 @@
+drop view order_product_view;

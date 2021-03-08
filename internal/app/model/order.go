@@ -11,18 +11,14 @@ import (
 //Order ...
 type Order struct {
 	ID          int    `json:"id"`
-	Description string `json:"description"`
-	Price       float64 `json:"price"`
-	ImageURL    string `json:""`
-	FirstName 	string `json:"first_name"`
-	LastName 	string `json:"last_name"`
-	Comment     string `json:"comment"`
-	Phone		string `json:"phone"`
+	DateCreate string `json:"date_create"`
+	DateUpdate string `json:"date_update"`
+	StatusId string `json:"status_id"`
 }
 
 //GetTableName ...
 func (p *Order) GetTableName() string {
-	return "product"
+	return "\"order\""
 }
 
 //GetSupportedScenarioValidation ...
@@ -47,7 +43,7 @@ func (p *Order) Validate(scenario string) error {
 				is.Alphanumeric,
 			),
 			validation.Field(
-				&p.Price,
+				&p.StatusId,
 				validation.Required,
 				is.Float,
 			),

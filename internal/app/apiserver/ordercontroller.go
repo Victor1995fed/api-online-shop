@@ -9,24 +9,24 @@ import (
 func (s *server) handleOrderCreate() http.HandlerFunc {
 
 	type request struct {
-		Price       float64 `json:"price"`
+		Price       float64 `json:"address"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		req := &request{}
-		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
-			return
-		}
-		p := &model.Order{
-			Price:       req.Price,
-		}
-
-		if err := s.store.Order().Create(p); err != nil {
-			s.error(w, r, http.StatusUnprocessableEntity, err)
-			return
-		}
-		// p.Sanitaze()
-		s.respond(w, r, http.StatusCreated, p)
+		//req := &request{}
+		//if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		//	s.error(w, r, http.StatusBadRequest, err)
+		//	return
+		//}
+		//p := &model.Order{
+		//	Price:       req.Price,
+		//}
+		//
+		//if err := s.store.Order().Create(p); err != nil {
+		//	s.error(w, r, http.StatusUnprocessableEntity, err)
+		//	return
+		//}
+		//// p.Sanitaze()
+		//s.respond(w, r, http.StatusCreated, p)
 
 	}
 }
@@ -84,23 +84,23 @@ func (s *server) handleOrderUpdate() http.HandlerFunc {
 		ID          int    `json:"id"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		req := &request{}
-		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
-			return
-		}
-		p := &model.Order{
-			Description: req.Description,
-			Price:       req.Price,
-			ImageURL:    req.ImgURL,
-			ID:          req.ID,
-		}
-
-		if err := s.store.Order().Update(p); err != nil {
-			s.error(w, r, http.StatusUnprocessableEntity, err)
-			return
-		}
-		s.respond(w, r, http.StatusCreated, p)
+		//req := &request{}
+		//if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		//	s.error(w, r, http.StatusBadRequest, err)
+		//	return
+		//}
+		//p := &model.Order{
+		//	Description: req.Description,
+		//	Price:       req.Price,
+		//	ImageURL:    req.ImgURL,
+		//	ID:          req.ID,
+		//}
+		//
+		//if err := s.store.Order().Update(p); err != nil {
+		//	s.error(w, r, http.StatusUnprocessableEntity, err)
+		//	return
+		//}
+		//s.respond(w, r, http.StatusCreated, p)
 
 	}
 }
