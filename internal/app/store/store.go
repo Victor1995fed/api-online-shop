@@ -5,4 +5,5 @@ type Store interface {
 	// User() UserRepository
 	Product() ProductRepository
 	Tag() TagRepository
+	Order() OrderRepository
 }

@@ -20,7 +20,7 @@ func (r *TagRepository) Create(m *model.Tag) error {
 		return err
 	}
 	return r.store.db.QueryRow(
-		"INSERT INTO "+m.GetTableName()+" (title ) VALUES ($1) RETURNING id",
+		"INSERT INTO "+m.GetTableName()+" (title) VALUES ($1) RETURNING id",
 		m.Title,
 	).Scan(&m.ID)
 }

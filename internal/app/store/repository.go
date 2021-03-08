@@ -26,3 +26,13 @@ type TagRepository interface {
 	List(map[string]string) ([]model.Tag, error)
 	Delete(*model.Tag) error
 }
+
+// OrderRepository ...
+type OrderRepository interface {
+	Create(*model.Order) error
+	Find(int) (*model.Order, error)
+	Update(*model.Order) error
+	List(map[string]string) ([]model.Order, error)
+	Delete(*model.Order) error
+}
+

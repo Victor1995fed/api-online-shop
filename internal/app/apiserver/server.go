@@ -78,6 +78,13 @@ func (s *server) configureRouter() {
 	s.router.HandleFunc("/tag", s.handleTagCreate()).Methods("POST")
 	s.router.HandleFunc("/tag", s.handleTagUpdate()).Methods("PUT")
 	s.router.HandleFunc("/tag", s.handleTagDelete()).Methods("DELETE")
+
+	//Order
+	s.router.HandleFunc("/order", s.handleOrderFind()).Methods("GET")
+	s.router.HandleFunc("/order-list", s.handleOrderList()).Methods("GET")
+	s.router.HandleFunc("/order", s.handleOrderCreate()).Methods("POST")
+	s.router.HandleFunc("/order", s.handleOrderUpdate()).Methods("PUT")
+	s.router.HandleFunc("/order", s.handleOrderDelete()).Methods("DELETE")
 	// println(controller.User)
 	// s.router.HandleFunc("/users", s.listUsers()).Methods("GET")
 	s.router.HandleFunc("/users", s.ListUsers()).Methods("GET")

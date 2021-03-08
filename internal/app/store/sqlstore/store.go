@@ -12,6 +12,7 @@ type Store struct {
 	// userRepository *UserRepository
 	productRepository *ProductRepository
 	tagRepository     *TagRepository
+	orderRepository     *OrderRepository
 }
 
 //New ...
@@ -62,6 +63,19 @@ func (s *Store) Tag() store.TagRepository {
 		store: s,
 	}
 	return s.tagRepository
+}
+
+//Order ...
+func (s *Store) Order() store.OrderRepository {
+
+	if s.orderRepository != nil {
+		return s.orderRepository
+	}
+
+	s.orderRepository = &OrderRepository{
+		store: s,
+	}
+	return s.orderRepository
 }
 
 // 	s.userRepository = &UserRepository{

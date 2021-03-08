@@ -25,9 +25,9 @@ ALTER TABLE "order_customer"
       REFERENCES "order"(id)
       ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "order_data"   
+ALTER TABLE "order_data"
   ADD CONSTRAINT "fk_order_data-order"
-      FOREIGN KEY(order_id) 
+      FOREIGN KEY(order_id)
       REFERENCES "order"(id)
       ON UPDATE CASCADE ON DELETE CASCADE;
 
