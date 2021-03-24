@@ -45,24 +45,18 @@ func (s *server) handleProductCreate() http.HandlerFunc {
 }
 
 func (s *server) handleProductFind() http.HandlerFunc {
-	type request struct {
-		ID int `json:"id"`
-	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
-		req := &request{}
-		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
-			return
-		}
-		id := req.ID
+		req := &filter.Product{}
+		var decoder = schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		id := req.Id
 		p, err := s.store.Product().Find(id)
 		if err != nil {
 			s.error(w, r, http.StatusUnprocessableEntity, err)
 			return
 		}
-		// p.Sanitaze()
 		s.respond(w, r, http.StatusFound, p)
-		// fmt.Fprint(w, "Users!\n")
 	}
 }
 
@@ -88,11 +82,11 @@ func (s *server) handleProductList() http.HandlerFunc {
 
 func (s *server) handleProductUpdate() http.HandlerFunc {
 	type request struct {
+		ID          int    `json:"id"`
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		Price       string `json:"price"`
-		ImgURL      string `json:"img_url"`
-		ID          int    `json:"id"`
+		Tags        []int  `json:"tags"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := &request{}
@@ -105,6 +99,12 @@ func (s *server) handleProductUpdate() http.HandlerFunc {
 			Description: req.Description,
 			Price:       req.Price,
 			ID:          req.ID,
+		}
+
+		for _, s := range req.Tags {
+			t := model.Tag{}
+			t.ID = s
+			p.Tags = append(p.Tags, t)
 		}
 
 		if err := s.store.Product().Update(p); err != nil {

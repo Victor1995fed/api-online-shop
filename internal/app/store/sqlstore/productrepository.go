@@ -4,6 +4,7 @@ import (
 	"api-online-store/internal/app/filter"
 	"api-online-store/internal/app/model"
 	"api-online-store/internal/app/store"
+	"api-online-store/tools/helpers"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -37,20 +38,11 @@ func (r *ProductRepository) Create(p *model.Product) error {
 		tx.Rollback()
 		return err
 	}
-	if len(p.Tags) > 0 {
-		//FIXME:: Требуется удалять дублирующиеся id
-		for _, s := range p.Tags {
-			pt := model.ProductTag{}
-			pt.ProductId = p.ID
-			pt.TagId = s.ID
-			ptr := ProductTagRepository{store: r.store, tx: tx}
-			err = ptr.Add(&pt)
-			if err != nil {
-				tx.Rollback()
-				return err
-			}
-
-		}
+	ptr := ProductTagRepository{store: r.store, tx: tx}
+	r.AddTags(p, &ptr, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -62,20 +54,32 @@ func (r *ProductRepository) Create(p *model.Product) error {
 // Find ...
 func (r *ProductRepository) Find(id int) (*model.Product, error) {
 	p := &model.Product{}
+	pt := p.GetTableName()
+	vp := p.GetViewTags()
+	var tagsData string
+	var arrTags []model.Tag
+	jsonFunc := "json_agg(json_build_object('id', " + vp + ".tag_id, 'title', " + vp + ".tag_title )) as tags"
 	if err := r.store.db.QueryRow(
-		"SELECT id, title, description, price  FROM "+p.GetTableName()+" WHERE id= $1",
+		"SELECT "+pt+".*, "+jsonFunc+" FROM "+
+			pt+" LEFT JOIN "+vp+" ON "+pt+".id = "+vp+".id WHERE "+pt+".id = $1  GROUP by "+pt+".id",
 		id,
 	).Scan(
 		&p.ID,
 		&p.Title,
 		&p.Description,
 		&p.Price,
+		&tagsData,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound
 		}
 		return nil, err
 	}
+	err := json.Unmarshal([]byte(tagsData), &arrTags)
+	if err != nil {
+		log.Fatal(err)
+	}
+	p.Tags = arrTags
 	return p, nil
 }
 
@@ -85,13 +89,42 @@ func (r *ProductRepository) Update(p *model.Product) error {
 		return err
 	}
 
-	return r.store.db.QueryRow(
-		"UPDATE "+p.GetTableName()+" SET title=$1, description=$2, price=$3, image_url=$4  WHERE id=$5 RETURNING id",
+	ctx := context.Background()
+	tx, err := r.store.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	err = tx.QueryRow(
+		"UPDATE "+p.GetTableName()+" SET title=$1, description=$2, price=$3  WHERE id=$4 RETURNING id",
 		p.Title,
 		p.Description,
 		p.Price,
 		p.ID,
 	).Scan(&p.ID)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	//Remove all tags
+	pt := model.ProductTag{}
+	ptr := ProductTagRepository{store: r.store, tx: tx}
+	pt.ProductId = p.ID
+	err = ptr.UnlinkProduct(&pt)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	//Add new tags
+	r.AddTags(p, &ptr, tx)
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 //List ...
@@ -142,4 +175,28 @@ func (r *ProductRepository) Delete(p *model.Product) error {
 		p.ID,
 	)
 	return err
+}
+
+func (*ProductRepository) AddTags(p *model.Product, ptr *ProductTagRepository, tx *sql.Tx) error {
+	if len(p.Tags) > 0 {
+		ah := helpers.ArrayHelper{}
+		var TagsId []int
+		for _, s := range p.Tags {
+			pt := model.ProductTag{}
+			_, found := ah.Find(TagsId, s.ID)
+			if found {
+				continue
+			}
+			TagsId = append(TagsId, s.ID)
+			pt.ProductId = p.ID
+			pt.TagId = s.ID
+			err := ptr.Add(&pt)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+		}
+	}
+	return nil
 }

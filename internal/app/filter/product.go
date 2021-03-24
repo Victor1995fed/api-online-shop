@@ -9,6 +9,7 @@ import (
 
 //Product ...
 type Product struct {
+	Id     int
 	Count  int
 	Offset int
 	Tags   []int
