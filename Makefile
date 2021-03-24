@@ -13,7 +13,7 @@ migrate-up:
 .PHONY: migrate-down
 
 migrate-down:
-	./migrate -path migrations -database "postgres://pgsql?dbname=${POSTGRES_DB}&user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}&sslmode=disable" down
+	./migrate -path migrations -database "postgres://pgsql?dbname=${POSTGRES_DB}&user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}&sslmode=disable" down $(N)
 
 .PHONY: migrate-create
 migrate-create:

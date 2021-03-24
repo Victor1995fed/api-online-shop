@@ -1,8 +1,10 @@
 package apiserver
 
 import (
+	"api-online-store/internal/app/filter"
 	"api-online-store/internal/app/model"
 	"encoding/json"
+	"github.com/gorilla/schema"
 	"net/http"
 )
 
@@ -12,6 +14,7 @@ func (s *server) handleProductCreate() http.HandlerFunc {
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		Price       string `json:"price"`
+		Tags        []int  `json:"tags"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := &request{}
@@ -23,8 +26,14 @@ func (s *server) handleProductCreate() http.HandlerFunc {
 			Title:       req.Title,
 			Description: req.Description,
 			Price:       req.Price,
+			Tags:        nil,
 		}
 
+		for _, s := range req.Tags {
+			t := model.Tag{}
+			t.ID = s
+			p.Tags = append(p.Tags, t)
+		}
 		if err := s.store.Product().Create(p); err != nil {
 			s.error(w, r, http.StatusUnprocessableEntity, err)
 			return
@@ -58,24 +67,21 @@ func (s *server) handleProductFind() http.HandlerFunc {
 }
 
 func (s *server) handleProductList() http.HandlerFunc {
-	type request struct {
-		Count string `json:"count"`
-	}
-	return func(w http.ResponseWriter, r *http.Request) {
-		req := &request{}
-		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
-			return
-		}
 
-		m := make(map[string]string)
-		m["count"] = req.Count
-		p, err := s.store.Product().List(m)
+	return func(w http.ResponseWriter, r *http.Request) {
+		req := &filter.Product{}
+		var decoder = schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
 		if err != nil {
 			s.error(w, r, http.StatusUnprocessableEntity, err)
 			return
 		}
-		s.respond(w, r, http.StatusCreated, p)
+		p, err := s.store.Product().List(req)
+		if err != nil {
+			s.error(w, r, http.StatusUnprocessableEntity, err)
+			return
+		}
+		s.respond(w, r, http.StatusFound, p)
 
 	}
 }
@@ -98,7 +104,6 @@ func (s *server) handleProductUpdate() http.HandlerFunc {
 			Title:       req.Title,
 			Description: req.Description,
 			Price:       req.Price,
-			ImageURL:    req.ImgURL,
 			ID:          req.ID,
 		}
 

@@ -1,6 +1,9 @@
 package store
 
-import "api-online-store/internal/app/model"
+import (
+	"api-online-store/internal/app/filter"
+	"api-online-store/internal/app/model"
+)
 
 // UserRepository ...
 type UserRepository interface {
@@ -14,7 +17,7 @@ type ProductRepository interface {
 	Create(*model.Product) error
 	Find(int) (*model.Product, error)
 	Update(*model.Product) error
-	List(map[string]string) ([]model.Product, error)
+	List(*filter.Product) ([]model.Product, error)
 	Delete(*model.Product) error
 }
 
@@ -35,4 +38,3 @@ type OrderRepository interface {
 	List(map[string]string) ([]model.Order, error)
 	Delete(*model.Order) error
 }
-

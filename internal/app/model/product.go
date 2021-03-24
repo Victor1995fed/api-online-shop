@@ -14,7 +14,8 @@ type Product struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Price       string `json:"price"`
-	ImageURL    string `json:""`
+	Tags        []Tag  `json:"tags"`
+	//TagsId 		[]int 	`json:"tags"`
 }
 
 //GetTableName ...
@@ -73,4 +74,9 @@ func (p *Product) Validate(scenario string) error {
 		result = errors.New("unknown scenario")
 	}
 	return result
+}
+
+//GetViewTags ...
+func (p *Product) GetViewTags() string {
+	return "product_tags_view"
 }

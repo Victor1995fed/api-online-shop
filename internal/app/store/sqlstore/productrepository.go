@@ -1,12 +1,14 @@
 package sqlstore
 
 import (
+	"api-online-store/internal/app/filter"
 	"api-online-store/internal/app/model"
 	"api-online-store/internal/app/store"
+	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 )
 
 //ProductRepository ...
@@ -19,13 +21,42 @@ func (r *ProductRepository) Create(p *model.Product) error {
 	if err := p.Validate(p.GetSupportedScenarioValidation()["CREATE"]); err != nil {
 		return err
 	}
-	return r.store.db.QueryRow(
-		"INSERT INTO "+p.GetTableName()+" (title, description, price, image_url ) VALUES ($1, $2, $3, $4) RETURNING id",
+	ctx := context.Background()
+	tx, err := r.store.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	err = tx.QueryRow(
+		"INSERT INTO "+p.GetTableName()+" (title, description, price ) VALUES ($1, $2, $3) RETURNING id",
 		p.Title,
 		p.Description,
 		p.Price,
-		p.ImageURL,
 	).Scan(&p.ID)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if len(p.Tags) > 0 {
+		//FIXME:: Требуется удалять дублирующиеся id
+		for _, s := range p.Tags {
+			pt := model.ProductTag{}
+			pt.ProductId = p.ID
+			pt.TagId = s.ID
+			ptr := ProductTagRepository{store: r.store, tx: tx}
+			err = ptr.Add(&pt)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+		}
+	}
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Find ...
@@ -59,37 +90,41 @@ func (r *ProductRepository) Update(p *model.Product) error {
 		p.Title,
 		p.Description,
 		p.Price,
-		p.ImageURL,
 		p.ID,
 	).Scan(&p.ID)
 }
 
 //List ...
-func (r *ProductRepository) List(m map[string]string) ([]model.Product, error) {
+func (r *ProductRepository) List(filter *filter.Product) ([]model.Product, error) {
 	p := []model.Product{}
-	c, err := strconv.Atoi(m["count"])
-	if err != nil {
-		return p, err
-	}
-	if c > 100 {
-		c = 100
-	}
 	var productModel *model.Product
-
-	rows, err := r.store.db.Query("SELECT id, title, description, price  FROM "+productModel.GetTableName()+" LIMIT  $1", c)
+	filterSql := filter.Apply(filter)
+	pt := productModel.GetTableName()
+	vp := productModel.GetViewTags()
+	jsonFunc := "json_agg(json_build_object('id', " + vp + ".tag_id, 'title', " + vp + ".tag_title )) as tags"
+	sql := "SELECT " + pt + ".*, " + jsonFunc + " FROM " +
+		pt + " LEFT JOIN " + vp + " ON " + pt + ".id = " + vp + ".id " + filterSql
+	fmt.Println(sql)
+	rows, err := r.store.db.Query(sql)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	for rows.Next() {
 		var pr model.Product
-		err := rows.Scan(&pr.ID, &pr.Title, &pr.Description, &pr.Price)
-
+		var tagsData string
+		var arrTags []model.Tag
+		err := rows.Scan(&pr.ID, &pr.Title, &pr.Description, &pr.Price, &tagsData)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(pr)
+		err = json.Unmarshal([]byte(tagsData), &arrTags)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pr.Tags = arrTags
 		p = append(p, pr)
 	}
+
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
