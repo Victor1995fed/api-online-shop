@@ -39,7 +39,13 @@ func (r *ProductRepository) Create(p *model.Product) error {
 		return err
 	}
 	ptr := ProductTagRepository{store: r.store, tx: tx}
-	r.AddTags(p, &ptr, tx)
+	err = r.AddTags(p, &ptr, tx)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -119,7 +125,11 @@ func (r *ProductRepository) Update(p *model.Product) error {
 	}
 
 	//Add new tags
-	r.AddTags(p, &ptr, tx)
+	err = r.AddTags(p, &ptr, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	err = tx.Commit()
 	if err != nil {
 		return err
@@ -192,7 +202,7 @@ func (*ProductRepository) AddTags(p *model.Product, ptr *ProductTagRepository, t
 			pt.TagId = s.ID
 			err := ptr.Add(&pt)
 			if err != nil {
-				tx.Rollback()
+				//tx.Rollback()
 				return err
 			}
 

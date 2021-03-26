@@ -4,8 +4,13 @@ import (
 	"api-online-store/internal/app/filter"
 	"api-online-store/internal/app/model"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/schema"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
+	"time"
 )
 
 func (s *server) handleProductCreate() http.HandlerFunc {
@@ -137,3 +142,91 @@ func (s *server) handleProductDelete() http.HandlerFunc {
 		s.respond(w, r, http.StatusAccepted, true)
 	}
 }
+
+func (s *server) handleProductAddImage() http.HandlerFunc  {
+
+	//TODO:: Перенести сохранение файлов в filerepository
+	//TODO:: Вынести указание на папку для файлов в конфиги
+	return func(w http.ResponseWriter, r *http.Request) {
+		//file, _, err := r.FormFile("image")
+		// 32 MB is the default used by FormFile()
+		if err := r.ParseMultipartForm(32 << 20); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		files := r.MultipartForm.File["images"]
+		if files == nil {
+			s.respond(w, r, http.StatusBadRequest, "Field for files must call is 'images'")
+			return
+		}
+		fmt.Println(files)
+		for _, fileHeader := range files {
+
+			//if fileHeader.Size > MAX_UPLOAD_SIZE {
+			//	http.Error(w, fmt.Sprintf("The uploaded image is too big: %s. Please use an image less than 1MB in size", fileHeader.Filename), http.StatusBadRequest)
+			//	return
+			//}
+
+			// Open the file
+			file, err := fileHeader.Open()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			defer file.Close()
+
+			buff := make([]byte, 512)
+			_, err = file.Read(buff)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			filetype := http.DetectContentType(buff)
+			if filetype != "image/jpeg" && filetype != "image/png" {
+				http.Error(w, "The provided file format is not allowed. Please upload a JPEG or PNG image", http.StatusBadRequest)
+				return
+			}
+
+			_, err = file.Seek(0, io.SeekStart)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			err = os.MkdirAll("./uploads", os.ModePerm)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			f, err := os.Create(fmt.Sprintf("./uploads/%d%s", time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			defer f.Close()
+
+			_, err = io.Copy(f, file)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+		}
+
+
+		s.respond(w, r, http.StatusAccepted, true)
+	}
+
+}
+
+//func (s *server) handleProductRemoveImage() http.HandlerFunc {
+//	// unlink images by id
+//	//...
+//	return func(w http.ResponseWriter, r *http.Request) {
+//
+//		s.respond(w, r, http.StatusAccepted, true)
+//	}
+//}
